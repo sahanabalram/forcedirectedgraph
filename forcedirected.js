@@ -14,5 +14,34 @@ $(document).ready(function () {
         "width": "90 px"
     });
 
-    d3.json("https://raw.githubusercontent.com/DealPete/forceDirected/master/countries.json")
+    d3.json("https://raw.githubusercontent.com/DealPete/forceDirected/master/countries.json", function(data){
+        var nodes = data["nodes"];
+        var links = data["links"];
+
+        var force = d3.layout.force().size([width,height]).nodes(d3.value(nodes)).links(link).on("tick",tick).linkDistance(300).start();
+
+        var link = svg.selectAll(".link").data(links).enter().append("line").attr("class","link");
+
+        var node = d3.select("#flags").selectAll(img).data(force.nodes()).enter().append('img').attr("class",function(d){
+            return "flag flag-" + d.code;
+        }).on("mouseover", mouseoverHandler).on("mousemove",mouseMoving).on("mouseout",mouseoutHandler);
+
+        function tick(e){
+            node.style("left",function(d){
+                return d.x + "px";
+            }).style("top",function(d){
+                return d.y + "px";
+            }).call(force.drag);
+        }
+
+        link.attr("x1",function(d){return d.source.x})
+            .attr("y1",function(d){return d.souce.y})
+            .attr("x2",function(d){return d.source.x})
+            .attr("y2", function(d){return d.souce.y})
+
+        function mouseoverHandler(d){
+            tooltip.transition.style("opacity", .9)
+            tooltip.html("<p>"+ d[country]+ "</p>");
+        }
+    })
 });
